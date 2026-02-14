@@ -6,6 +6,6 @@
 *.iml
 out
 gen
-.env
+settings/.env
 logs/
 
