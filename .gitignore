@@ -1,0 +1,10 @@
+.idea
+*.iml
+out
+gen
+__pycache__/
+*.py[cod]
+.DS_Store
+settings/.env
+logs/
+db.sqlite3

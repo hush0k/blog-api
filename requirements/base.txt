@@ -1,0 +1,10 @@
+Django==6.0.2
+djangorestframework==3.16.1
+djangorestframework-simplejwt==5.5.1
+python-decouple==3.8
+django-redis==6.0.0
+redis==7.0.1
+django-ratelimit==4.1.0
+psycopg==3.3.2
+psycopg-binary==3.3.2
+Pillow==11.1.0

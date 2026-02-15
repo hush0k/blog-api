@@ -1,0 +1,53 @@
+@startuml
+class User{
+    -id: int
+    -email: string
+    -first_name: string
+    -last_name: string
+    -is_active: boolean
+    -is_stuff: boolean
+    -date_joined: datetime
+    -avatar: String
+}
+
+class Category{
+    -id: int
+    -name: string
+    -slug: string
+}
+
+class Tag{
+    -id: int
+    -name: string
+    -slug: string
+}
+
+class Post{
+    -id: int
+    -author_id: int
+    -title: string
+    -slug: string
+    -body: text
+    -category_id: int
+    -tags: list of Tag
+    -status: string
+    -created_at: datetime
+    -updated_at: datetime
+}
+
+class Comments{
+    -id: int
+    -post_id: int
+    -author_id: int
+    -body: text
+    -created_at: datetime
+}
+
+
+User "1" -- "0..*" Post : author
+Post "1" -- "0..1" Category : category'
+Post "0..*" -- "0..*" Tag : tags
+Post "1" -- "0..*" Comments : comments
+Comments "1" -- "1" User : author
+
+@enduml
