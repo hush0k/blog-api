@@ -1,11 +1,10 @@
-### Example user template template
-### Example user template
-
-# IntelliJ project files
 .idea
 *.iml
 out
 gen
+__pycache__/
+*.py[cod]
+.DS_Store
 settings/.env
 logs/
-
+db.sqlite3

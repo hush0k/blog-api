@@ -1,19 +1,10 @@
 from rest_framework.permissions import SAFE_METHODS, BasePermission
 
+from apps.blog.models import Post
 
-class IsOwnerOrReadOnly(BasePermission):
-    def has_object_permission(self, request, view, obj):
+
+class IsPostPublishedOrOwner(BasePermission):
+    def has_object_permission(self, request, view, obj) -> bool:
         if request.method in SAFE_METHODS:
-            return True
-
-        return getattr(obj, "author_id", None) == getattr(request.user, "id", None)
-
-class ReadPublisherOrOwner(BasePermission):
-    def has_object_permission(self, request, view, obj):
-        if request.method in SAFE_METHODS:
-            return True
-
-        if getattr(obj, "status", None) == "published":
-            return True
-
-        return getattr(obj, "author_id", None) == getattr(request.user, "id", None)
+            return obj.status == Post.Status.PUBLISHED or obj.author_id == getattr(request.user, "id", None)
+        return obj.author_id == getattr(request.user, "id", None)

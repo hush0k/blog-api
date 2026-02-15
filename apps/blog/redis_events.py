@@ -1,14 +1,20 @@
 import json
+from typing import Any
+
 from django_redis import get_redis_connection
 
-def publish_comment_created(comment):
+CHANNEL_NAME = "comments"
+EVENT_TYPE_COMMENT_CREATED = "comment.created"
+
+
+def publish_comment_created(comment: Any) -> None:
     payload = {
-        "type": "comment.created",
+        "type": EVENT_TYPE_COMMENT_CREATED,
         "comment_id": comment.id,
         "post_id": comment.post_id,
         "author_id": comment.author_id,
-        "text": comment.text,
+        "body": comment.body,
         "created_at": comment.created_at.isoformat(),
     }
-    r = get_redis_connection("default")
-    r.publish("comments", json.dumps(payload, ensure_ascii=False))
+    redis_connection = get_redis_connection("default")
+    redis_connection.publish(CHANNEL_NAME, json.dumps(payload, ensure_ascii=False))
