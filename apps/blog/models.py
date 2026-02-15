@@ -23,13 +23,19 @@ class Post(models.Model):
         PUBLISHED = "published", "Published"
 
     id = models.AutoField(primary_key=True)
-    author = models.ForeignKey("users.User", on_delete=models.CASCADE, related_name="posts")
+    author = models.ForeignKey(
+        "users.User", on_delete=models.CASCADE, related_name="posts"
+    )
     title = models.CharField(max_length=200)
     slug = models.SlugField(unique=True)
     body = models.TextField()
-    category = models.ForeignKey("Category", on_delete=models.SET_NULL, related_name="posts", null=True)
+    category = models.ForeignKey(
+        "Category", on_delete=models.SET_NULL, related_name="posts", null=True
+    )
     tags = models.ManyToManyField("Tag", related_name="posts", blank=True)
-    status = models.CharField(max_length=10, choices=Status.choices, default=Status.DRAFT)
+    status = models.CharField(
+        max_length=10, choices=Status.choices, default=Status.DRAFT
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -40,7 +46,9 @@ class Post(models.Model):
 class Comment(models.Model):
     id = models.AutoField(primary_key=True)
     post = models.ForeignKey("Post", on_delete=models.CASCADE, related_name="comments")
-    author = models.ForeignKey("users.User", on_delete=models.CASCADE, related_name="comments")
+    author = models.ForeignKey(
+        "users.User", on_delete=models.CASCADE, related_name="comments"
+    )
     body = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 

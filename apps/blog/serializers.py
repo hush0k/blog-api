@@ -15,13 +15,31 @@ class PostReadSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ["id", "author", "title", "slug", "body", "category", "tags", "status", "created_at", "updated_at"]
+        fields = [
+            "id",
+            "author",
+            "title",
+            "slug",
+            "body",
+            "category",
+            "tags",
+            "status",
+            "created_at",
+            "updated_at",
+        ]
         read_only_fields = fields
 
 
 class PostWriteSerializer(serializers.ModelSerializer):
-    category_id = serializers.PrimaryKeyRelatedField(source="category", queryset=Category.objects.all(), required=False, allow_null=True)
-    tag_ids = serializers.PrimaryKeyRelatedField(source="tags", queryset=Tag.objects.all(), many=True, required=False)
+    category_id = serializers.PrimaryKeyRelatedField(
+        source="category",
+        queryset=Category.objects.all(),
+        required=False,
+        allow_null=True,
+    )
+    tag_ids = serializers.PrimaryKeyRelatedField(
+        source="tags", queryset=Tag.objects.all(), many=True, required=False
+    )
 
     class Meta:
         model = Post

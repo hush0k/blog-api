@@ -19,7 +19,11 @@ class RegisterViewSet(viewsets.ViewSet):
     @ratelimit_or_429(key="ip", rate="5/m", method=("POST",), group="auth_register")
     def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         email = request.data.get("email")
-        logger.info("Registration attempt email=%s ip=%s", email, request.META.get("REMOTE_ADDR"))
+        logger.info(
+            "Registration attempt email=%s ip=%s",
+            email,
+            request.META.get("REMOTE_ADDR"),
+        )
 
         serializer = UserCreateSerializer(data=request.data)
         try:

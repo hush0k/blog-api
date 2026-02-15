@@ -16,7 +16,11 @@ def too_many_requests_response() -> Response:
 
 
 def ratelimit_or_429(
-    *, key: Any, rate: str, method: tuple[str, ...] | list[str] = ("POST",), group: str | None = None
+    *,
+    key: Any,
+    rate: str,
+    method: tuple[str, ...] | list[str] = ("POST",),
+    group: str | None = None,
 ) -> Callable:
     def decorator(view_func: Callable) -> Callable:
         limited = ratelimit(key=key, rate=rate, method=method, group=group, block=False)

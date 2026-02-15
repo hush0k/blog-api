@@ -1,7 +1,9 @@
 import logging
 from typing import Any
 
-from django.contrib.auth.password_validation import validate_password as django_validate_password
+from django.contrib.auth.password_validation import (
+    validate_password as django_validate_password,
+)
 from rest_framework import serializers
 
 from apps.users.models import User
@@ -15,11 +17,21 @@ class UserCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ("id", "email", "first_name", "last_name", "password", "password2", "avatar")
+        fields = (
+            "id",
+            "email",
+            "first_name",
+            "last_name",
+            "password",
+            "password2",
+            "avatar",
+        )
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         if attrs["password"] != attrs["password2"]:
-            logger.warning("Registration serializer rejected request: passwords mismatch")
+            logger.warning(
+                "Registration serializer rejected request: passwords mismatch"
+            )
             raise serializers.ValidationError("Passwords do not match.")
         django_validate_password(attrs["password"])
         return attrs

@@ -8,6 +8,10 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/", include("apps.users.urls")),
     path("api/", include("apps.blog.urls")),
-    path("api/auth/token/", TokenObtainPairRateLimitedView.as_view(), name="token_obtain_pair"),
+    path(
+        "api/auth/token/",
+        TokenObtainPairRateLimitedView.as_view(),
+        name="token_obtain_pair",
+    ),
     path("api/auth/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
 ]
