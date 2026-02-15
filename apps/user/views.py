@@ -7,6 +7,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from apps.common.ratelimit import ratelimit_or_429
 from apps.user.models import User
 from apps.user.serializers import UserCreateSerializer, UserSerializer
 
@@ -22,6 +23,7 @@ class UserViewSet(viewsets.ModelViewSet):
             return UserCreateSerializer
         return UserSerializer
 
+    @ratelimit_or_429(key="ip", rate="5/m", method=("POST",), group="auth_register")
     def create(self, request, *args, **kwargs):
         email = request.data.get("email")
         ip = request.META.get("REMOTE_ADDR")
