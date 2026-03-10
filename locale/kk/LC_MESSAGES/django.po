@@ -56,3 +56,10 @@ msgstr "Тілге қолдау көрсетілмейді."
 #: apps/users/serializers.py:75
 msgid "Invalid timezone. Use valid IANA timezone"
 msgstr "Уақыт белдеуі жарамсыз. Жарамды IANA уақыт белдеуін пайдаланыңыз"
+
+msgid "Welcome!"
+msgstr "Қош келдіңіз!"
+
+msgid "Hello, %(email)s! Thank you for registering."
+msgstr "Сәлем, %(email)s! Тіркелгеніңіз үшін рахмет."
+

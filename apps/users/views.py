@@ -1,6 +1,9 @@
 import logging
 from typing import Any
 
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.utils import translation
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -13,6 +16,18 @@ from apps.users.serializers import UserCreateSerializer, UserSerializer, UserLan
 
 logger = logging.getLogger("users")
 
+def send_welcome_email(user):
+    with translation.override(user.language or "en"):
+        body = render_to_string(
+            "emails/welcome.html",
+            {"user": user}
+        )
+        send_mail(
+            subject=str(translation.gettext("Welcome!")),
+            message=body,
+            from_email="noreply@blog.com",
+            recipient_list=[user.email],
+        )
 
 class RegisterViewSet(viewsets.ViewSet):
     permission_classes = [AllowAny]
@@ -33,6 +48,8 @@ class RegisterViewSet(viewsets.ViewSet):
         except Exception:
             logger.exception("Registration failed email=%s", email)
             raise
+
+        send_welcome_email(user)
 
         refresh = RefreshToken.for_user(user)
         logger.info("Registration success user_id=%s email=%s", user.id, user.email)

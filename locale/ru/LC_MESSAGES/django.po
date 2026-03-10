@@ -58,3 +58,9 @@ msgstr "Язык не поддерживается."
 #: apps/users/serializers.py:75
 msgid "Invalid timezone. Use valid IANA timezone"
 msgstr "Неверный часовой пояс. Используйте действительный часовой пояс IANA"
+
+msgid "Welcome!"
+msgstr "Добро пожаловать!"
+
+msgid "Hello, %(email)s! Thank you for registering."
+msgstr "Привет, %(email)s! Спасибо за регистрацию."
