@@ -18,8 +18,10 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "rest_framework_simplejwt",
+    "apps.core",
     "apps.blog",
     "apps.users",
+    "drf_spectacular",
 ]
 
 MIDDLEWARE = [
@@ -28,10 +30,10 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
-    "apps.common.middleware.LanguageDetectionMiddleware",
+    "apps.core.middleware.LanguageDetectionMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "apps.common.middleware.DebugRequestsMiddleware",
+    "apps.core.middleware.DebugRequestsMiddleware",
 ]
 
 ROOT_URLCONF = "settings.urls"
@@ -92,6 +94,13 @@ REST_FRAMEWORK = {
     ),
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 10,
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Blog API",
+    "DESCRIPTION": "Blog API with multilanguage support",
+    "VERSION": "1.0.0",
 }
 
 SIMPLE_JWT = {

@@ -19,7 +19,7 @@ from apps.blog.serializers import (
     PostReadSerializer,
     PostWriteSerializer,
 )
-from apps.common.ratelimit import ratelimit_or_429, user_or_ip
+from apps.core.ratelimit import ratelimit_or_429, user_or_ip
 
 logger = logging.getLogger("blog")
 LIST_CACHE_KEY_PREFIX = "post:list:published"
@@ -53,7 +53,8 @@ class PostViewSet(viewsets.ModelViewSet):
 
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         page_number = request.query_params.get("page", "1")
-        cache_key = f"{LIST_CACHE_KEY_PREFIX}:page:{page_number}"
+        lang = getattr(request, "LANGUAGE_CODE", "en")
+        cache_key = f"{LIST_CACHE_KEY_PREFIX}:lang:{lang}:page:{page_number}"
         cached = cache.get(cache_key)
         if cached is not None:
             logger.debug("Post list cache hit page=%s", page_number)

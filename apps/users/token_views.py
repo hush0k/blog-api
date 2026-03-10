@@ -5,7 +5,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-from apps.common.ratelimit import ratelimit_or_429
+from apps.core.ratelimit import ratelimit_or_429
 
 logger = logging.getLogger("users")
 
