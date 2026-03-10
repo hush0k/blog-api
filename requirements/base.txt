@@ -8,3 +8,7 @@ django-ratelimit==4.1.0
 psycopg==3.3.2
 psycopg-binary==3.3.2
 Pillow==11.1.0
+babel==2.17.0
+drf-spectacular==0.28.0
+httpx==0.28.1
+

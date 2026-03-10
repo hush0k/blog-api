@@ -5,14 +5,15 @@ from typing import Any
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.models import PermissionsMixin
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 
 class UserManager(BaseUserManager):
     def create_user(self, email: str, password: str, **extra_fields: Any) -> "User":
         if not email:
-            raise ValueError("The Email field must be set")
+            raise ValueError(_("The Email field must be set"))
         if not password:
-            raise ValueError("The Password field must be set")
+            raise ValueError(_("The Password field must be set"))
         normalized_email = self.normalize_email(email).lower()
         user = self.model(email=normalized_email, **extra_fields)
         user.set_password(password)
@@ -27,9 +28,9 @@ class UserManager(BaseUserManager):
         extra_fields.setdefault("is_active", True)
 
         if extra_fields.get("is_staff") is not True:
-            raise ValueError("Superuser must have is_staff=True.")
+            raise ValueError(_("Superuser must have is_staff=True."))
         if extra_fields.get("is_superuser") is not True:
-            raise ValueError("Superuser must have is_superuser=True.")
+            raise ValueError(_("Superuser must have is_superuser=True."))
 
         return self.create_user(email, password, **extra_fields)
 
@@ -45,6 +46,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     date_joined = models.DateTimeField(auto_now_add=True)
+    language = models.CharField(max_length=10, default="en")
+    timezone = models.CharField(max_length=50, default="UTC")
     avatar = models.ImageField(upload_to="avatar/%Y/%m", blank=True, null=True)
 
     objects = UserManager()

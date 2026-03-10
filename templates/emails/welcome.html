@@ -1,0 +1,8 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="en">
+<body>
+<h1>{% trans "Welcome!" %}</h1>
+<p>{% blocktrans with email=user.email %}Hello, {{ email }}! Thank you for registering.{% endblocktrans %}</p>
+</body>
+</html>

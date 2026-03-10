@@ -18,8 +18,10 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "rest_framework_simplejwt",
+    "apps.core",
     "apps.blog",
     "apps.users",
+    "drf_spectacular",
 ]
 
 MIDDLEWARE = [
@@ -28,9 +30,10 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "apps.core.middleware.LanguageDetectionMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "apps.common.middleware.DebugRequestsMiddleware",
+    "apps.core.middleware.DebugRequestsMiddleware",
 ]
 
 ROOT_URLCONF = "settings.urls"
@@ -70,6 +73,8 @@ AUTH_PASSWORD_VALIDATORS = [
 
 REDIS_URL = env_str("BLOG_REDIS_URL", "redis://127.0.0.1:6379/1")
 
+RATELIMIT_FAIL_OPEN = True
+
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
@@ -91,6 +96,13 @@ REST_FRAMEWORK = {
     ),
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 10,
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Blog API",
+    "DESCRIPTION": "Blog API with multilanguage support",
+    "VERSION": "1.0.0",
 }
 
 SIMPLE_JWT = {
@@ -100,6 +112,16 @@ SIMPLE_JWT = {
     "BLACKLIST_AFTER_ROTATION": False,
     "UPDATE_LAST_LOGIN": True,
 }
+
+LANGUAGES = [
+    ("en", "English"),
+    ("ru", "Russian"),
+    ("kk", "Kazakh")
+]
+
+LOCALE_PATHS = [BASE_DIR / "locale"]
+
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 AUTH_USER_MODEL = "users.User"
 
