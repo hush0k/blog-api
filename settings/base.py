@@ -73,6 +73,8 @@ AUTH_PASSWORD_VALIDATORS = [
 
 REDIS_URL = env_str("BLOG_REDIS_URL", "redis://127.0.0.1:6379/1")
 
+RATELIMIT_FAIL_OPEN = True
+
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",

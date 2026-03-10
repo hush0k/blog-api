@@ -10,8 +10,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
-from drf_spectacular.utils import extend_schema_view, extend_schema, OpenApiExample, OpenApiResponse
-
+from drf_spectacular.utils import extend_schema, OpenApiExample, OpenApiResponse, extend_schema_view
 
 from apps.core.ratelimit import ratelimit_or_429
 from apps.users.serializers import UserCreateSerializer, UserSerializer, UserLanguageSerializer, UserTimezoneSerializer
@@ -31,15 +30,50 @@ def send_welcome_email(user):
             recipient_list=[user.email],
         )
 
-
+@extend_schema_view(
+    create=extend_schema(
+        tags=["Auth"],
+        summary="Create a new user",
+        description="Creates a new user account. Returns JWT tokens on success. Rate limited to 5 requests per minute per IP.",
+        request=UserCreateSerializer,
+        responses={
+            201: OpenApiResponse(description="User created"),
+            400: OpenApiResponse(description="Validation error"),
+            429: OpenApiResponse(description="Rate limit exceeded"),
+        },
+        examples=[
+            OpenApiExample(
+                "Request",
+                value={
+                    "email": "user@example.com",
+                    "first_name": "John",
+                    "last_name": "Doe",
+                    "password": "StrongPass123!",
+                    "password2": "StrongPass123!",
+                },
+                request_only=True,
+            ),
+            OpenApiExample(
+                "Response",
+                value={
+                    "user": {
+                        "id": 1,
+                        "email": "user@example.com",
+                        "first_name": "John",
+                        "last_name": "Doe",
+                        "avatar": None,
+                    },
+                    "tokens": {"refresh": "eyJ...", "access": "eyJ..."},
+                },
+                response_only=True,
+                status_codes=["201"],
+            ),
+        ],
+    )
+)
 class RegisterViewSet(viewsets.ViewSet):
     permission_classes = [AllowAny]
 
-    @extend_schema(
-        tags=["Auth"],
-        summary="Create a new user",
-        description="Create a new user",
-    )
     @ratelimit_or_429(key="ip", rate="5/m", method=("POST",), group="auth_register")
     def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         email = request.data.get("email")

@@ -9,6 +9,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.request import Request
 from rest_framework.response import Response
+from drf_spectacular.utils import extend_schema, OpenApiExample, OpenApiResponse, extend_schema_view
 
 from apps.blog.models import Comment, Post
 from apps.blog.permissions import IsPostPublishedOrOwner
@@ -25,7 +26,34 @@ logger = logging.getLogger("blog")
 LIST_CACHE_KEY_PREFIX = "post:list:published"
 LIST_CACHE_TTL_SECONDS = 60
 
-
+@extend_schema_view(
+    retrieve=extend_schema(
+        tags=["Posts"],
+        summary="Get post details",
+        description="Returns a single post by slug. Authenticated users can also see their own draft posts. Dates formatted by user locale and timezone.",
+        responses={
+            200: PostReadSerializer,
+            404: OpenApiResponse(description="Post not found"),
+        },
+    ),
+    create=extend_schema(
+        tags=["Posts"],
+        summary="Create a post",
+        description="Creates a new post. Authentication required. Invalidates the posts list cache for all languages. Rate limited to 20 requests per minute.",
+        request=PostWriteSerializer,
+        responses={
+            201: PostWriteSerializer,
+            400: OpenApiResponse(description="Validation error"),
+            401: OpenApiResponse(description="Authentication required"),
+            429: OpenApiResponse(description="Rate limit exceeded"),
+        },
+        examples=[
+            OpenApiExample("Request", value={"title": "My post", "slug": "my-post", "body": "Content", "status": "published"}, request_only=True),
+            OpenApiExample("Response", value={"title": "My post", "slug": "my-post", "body": "Content", "status": "published"}, response_only=True, status_codes=["201"]),
+        ],
+    ),
+    update=extend_schema(exclude=True),
+)
 class PostViewSet(viewsets.ModelViewSet):
     lookup_field = "slug"
     queryset = Post.objects.select_related("author", "category").prefetch_related(
@@ -51,6 +79,40 @@ class PostViewSet(viewsets.ModelViewSet):
             return PostReadSerializer
         return PostWriteSerializer
 
+    @extend_schema(
+        tags=["Posts"],
+        summary="List published posts",
+        description="Returns paginated list of published posts. Dates are formatted by user locale and timezone. Response is cached in Redis per language. Anonymous users see UTC dates. Cache is invalidated when any post is created, updated or deleted.",
+        responses={
+            200: PostReadSerializer,
+        },
+        examples=[
+            OpenApiExample(
+                "Response",
+                value={
+                    "count": 1,
+                    "next": None,
+                    "previous": None,
+                    "results": [
+                        {
+                            "id": 1,
+                            "author": "user@example.com",
+                            "title": "My first post",
+                            "slug": "my-first-post",
+                            "body": "Post content here",
+                            "category": "Technology",
+                            "tags": ["python", "django"],
+                            "status": "published",
+                            "created_at": "March 10, 2026, 2:30:00 PM UTC",
+                            "updated_at": "March 10, 2026, 2:30:00 PM UTC",
+                        }
+                    ],
+                },
+                response_only=True,
+                status_codes=["200"],
+            ),
+        ],
+    )
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         page_number = request.query_params.get("page", "1")
         lang = getattr(request, "LANGUAGE_CODE", "en")
@@ -104,9 +166,27 @@ class PostViewSet(viewsets.ModelViewSet):
             )
         return response
 
+
     def perform_create(self, serializer: PostWriteSerializer) -> None:
         serializer.save(author=self.request.user)
 
+    @extend_schema(
+        tags=["Posts"],
+        summary="Update a post",
+        description="Partially updates a post. Authentication required. Only the post author can update. Invalidates the posts list cache for all languages.",
+        request=PostWriteSerializer,
+        responses={
+            200: PostWriteSerializer,
+            400: OpenApiResponse(description="Validation error"),
+            401: OpenApiResponse(description="Authentication required"),
+            403: OpenApiResponse(description="Not the post author"),
+            404: OpenApiResponse(description="Post not found"),
+        },
+        examples=[
+            OpenApiExample("Request", value={"title": "Updated title"}, request_only=True),
+            OpenApiExample("Response", value={"title": "Updated title", "slug": "my-post"}, response_only=True, status_codes=["200"]),
+        ],
+    )
     def partial_update(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         logger.info(
             "Post update attempt user_id=%s slug=%s",
@@ -138,6 +218,17 @@ class PostViewSet(viewsets.ModelViewSet):
             )
         return response
 
+    @extend_schema(
+        tags=["Posts"],
+        summary="Delete a post",
+        description="Deletes a post. Authentication required. Only the post author can delete. Invalidates the posts list cache for all languages.",
+        responses={
+            204: OpenApiResponse(description="Post deleted"),
+            401: OpenApiResponse(description="Authentication required"),
+            403: OpenApiResponse(description="Not the post author"),
+            404: OpenApiResponse(description="Post not found"),
+        },
+    )
     def destroy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         logger.info(
             "Post delete attempt user_id=%s slug=%s",
@@ -169,6 +260,29 @@ class PostViewSet(viewsets.ModelViewSet):
             )
         return response
 
+    @extend_schema(
+        tags=["Comments"],
+        summary="List or create comments",
+        description="GET: Returns paginated comments for a post. POST: Creates a new comment. Authentication required for POST.",
+        request=CommentWriteSerializer,
+        responses={
+            200: CommentReadSerializer,
+            201: CommentReadSerializer,
+            400: OpenApiResponse(description="Validation error"),
+            401: OpenApiResponse(description="Authentication required"),
+            403: OpenApiResponse(description="Post not accessible"),
+            404: OpenApiResponse(description="Post not found"),
+        },
+        examples=[
+            OpenApiExample("Request", value={"body": "Great post!"}, request_only=True),
+            OpenApiExample(
+                "Response",
+                value={"id": 1, "author": "user@example.com", "body": "Great post!", "created_at": "2026-03-10"},
+                response_only=True,
+                status_codes=["201"],
+            ),
+        ],
+    )
     @action(
         detail=True,
         methods=["get", "post"],
@@ -224,6 +338,24 @@ class PostViewSet(viewsets.ModelViewSet):
             CommentReadSerializer(comment).data, status=status.HTTP_201_CREATED
         )
 
+    @extend_schema(
+        tags=["Comments"],
+        summary="Update or delete a comment",
+        description="PATCH: Updates a comment. DELETE: Deletes a comment. Authentication required. Only the comment author can modify or delete.",
+        request=CommentWriteSerializer,
+        responses={
+            200: CommentReadSerializer,
+            204: OpenApiResponse(description="Comment deleted"),
+            400: OpenApiResponse(description="Validation error"),
+            401: OpenApiResponse(description="Authentication required"),
+            403: OpenApiResponse(description="Not the comment author"),
+            404: OpenApiResponse(description="Comment not found"),
+        },
+        examples=[
+            OpenApiExample("Request", value={"body": "Updated comment"}, request_only=True),
+            OpenApiExample("Response", value={"id": 1, "body": "Updated comment"}, response_only=True, status_codes=["200"]),
+        ],
+    )
     @action(
         detail=True,
         methods=["patch", "delete"],
