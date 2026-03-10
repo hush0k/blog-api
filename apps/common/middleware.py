@@ -1,6 +1,7 @@
 import logging
 from typing import Any, Callable
 from django.conf import settings
+from django.utils import translation
 
 request_logger = logging.getLogger("debug.request")
 
@@ -26,6 +27,7 @@ class LanguageDetectionMiddleware:
     def __call__(self, request: Any) -> Any:
         language = self._detect_language(request)
         request.LANGUAGE_CODE = language
+        translation.activate(language)
         return self.get_response(request)
 
     @staticmethod

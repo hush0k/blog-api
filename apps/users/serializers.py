@@ -6,6 +6,7 @@ from django.contrib.auth.password_validation import (
     validate_password as django_validate_password,
 )
 from rest_framework import serializers
+from django.utils.translation import gettext_lazy as _
 
 from apps.users.models import User
 
@@ -34,7 +35,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
             logger.warning(
                 "Registration serializer rejected request: passwords mismatch"
             )
-            raise serializers.ValidationError("Passwords do not match.")
+            raise serializers.ValidationError(_("Passwords do not match."))
         django_validate_password(attrs["password"])
         return attrs
 
@@ -59,7 +60,7 @@ class UserLanguageSerializer(serializers.Serializer):
     def validate_language(value):
         if value not in SUPPORTED_LANGUAGES:
             raise serializers.ValidationError(
-                f"Language not supported. Choose from this: {SUPPORTED_LANGUAGES}"
+                _(f"Language not supported.")
             )
         return value
 
@@ -67,10 +68,11 @@ class UserLanguageSerializer(serializers.Serializer):
 class UserTimezoneSerializer(serializers.Serializer):
     timezone = serializers.CharField()
 
-    def validate_timezone(self, value):
+    @staticmethod
+    def validate_timezone(value):
         if value not in zoneinfo.available_timezones():
             raise serializers.ValidationError(
-                f"Invalid timezone. Use valid IANA timezone"
+                _(f"Invalid timezone. Use valid IANA timezone")
             )
         return value
 

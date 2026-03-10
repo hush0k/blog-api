@@ -62,12 +62,12 @@ class PostViewSet(viewsets.ModelViewSet):
         queryset = self.filter_queryset(self.get_queryset())
         page = self.paginate_queryset(queryset)
         if page is not None:
-            serializer = PostReadSerializer(page, many=True)
+            serializer = PostReadSerializer(page, many=True, context={"request": request})
             data = serializer.data
             cache.set(cache_key, data, LIST_CACHE_TTL_SECONDS)
             return self.get_paginated_response(data)
 
-        serializer = PostReadSerializer(queryset, many=True)
+        serializer = PostReadSerializer(queryset, many=True, context={"request": request})
         data = serializer.data
         cache.set(cache_key, data, LIST_CACHE_TTL_SECONDS)
         return Response(data)

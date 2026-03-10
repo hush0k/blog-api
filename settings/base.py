@@ -102,6 +102,16 @@ SIMPLE_JWT = {
     "UPDATE_LAST_LOGIN": True,
 }
 
+LANGUAGES = [
+    ("en", "English"),
+    ("ru", "Russian"),
+    ("kk", "Kazakh")
+]
+
+LOCALE_PATHS = [BASE_DIR / "locale"]
+
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
 AUTH_USER_MODEL = "users.User"
 
 LANGUAGE_CODE = "en-us"
