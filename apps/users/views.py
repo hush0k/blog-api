@@ -49,10 +49,10 @@ class RegisterViewSet(viewsets.ViewSet):
         )
 
 
-class UserMeViewSet(viewsets.ModelViewSet):
+class UserMeViewSet(viewsets.ViewSet):
     permission_classes = [IsAuthenticated]
 
-    @action(datail=False, url_path="language", methods=["patch"])
+    @action(detail=False, url_path="language", methods=["patch"])
     def language(self, request):
         serializer = UserLanguageSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -61,7 +61,7 @@ class UserMeViewSet(viewsets.ModelViewSet):
         return Response({"language": request.user.language})
 
 
-    @action(datail=False, methods=["patch"], url_path="timezone")
+    @action(detail=False, methods=["patch"], url_path="timezone")
     def timezone(self, request):
         serializer = UserTimezoneSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)

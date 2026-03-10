@@ -46,7 +46,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     date_joined = models.DateTimeField(auto_now_add=True)
     language = models.CharField(max_length=10, default="en")
-    timezone = models.CharField(max_length=10, default="UTC")
+    timezone = models.CharField(max_length=50, default="UTC")
     avatar = models.ImageField(upload_to="avatar/%Y/%m", blank=True, null=True)
 
     objects = UserManager()
