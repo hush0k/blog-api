@@ -11,7 +11,7 @@ from apps.users.models import User
 
 logger = logging.getLogger("users")
 
-SUPPORTED_LANGUAGES = ["en", "ru", "kz"]
+SUPPORTED_LANGUAGES = ["en", "ru", "kk"]
 
 class UserCreateSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)

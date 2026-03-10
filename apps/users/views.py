@@ -2,13 +2,14 @@ import logging
 from typing import Any
 
 from rest_framework import status, viewsets
-from rest_framework.permissions import AllowAny
+from rest_framework.decorators import action
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from apps.common.ratelimit import ratelimit_or_429
-from apps.users.serializers import UserCreateSerializer, UserSerializer
+from apps.users.serializers import UserCreateSerializer, UserSerializer, UserLanguageSerializer, UserTimezoneSerializer
 
 logger = logging.getLogger("users")
 
@@ -46,3 +47,24 @@ class RegisterViewSet(viewsets.ViewSet):
             },
             status=status.HTTP_201_CREATED,
         )
+
+
+class UserMeViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticated]
+
+    @action(datail=False, url_path="language", methods=["patch"])
+    def language(self, request):
+        serializer = UserLanguageSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        request.user.language = serializer.validated_data["language"]
+        request.user.save(update_fields=["language"])
+        return Response({"language": request.user.language})
+
+
+    @action(datail=False, methods=["patch"], url_path="timezone")
+    def timezone(self, request):
+        serializer = UserTimezoneSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        request.user.timezone = serializer.validated_data["timezone"]
+        request.user.save(update_fields=["timezone"])
+        return Response({"timezone": request.user.timezone})
