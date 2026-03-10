@@ -1,5 +1,6 @@
 import logging
 from typing import Any
+import zoneinfo
 
 from django.contrib.auth.password_validation import (
     validate_password as django_validate_password,
@@ -10,6 +11,7 @@ from apps.users.models import User
 
 logger = logging.getLogger("users")
 
+SUPPORTED_LANGUAGES = ["en", "ru", "kz"]
 
 class UserCreateSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
@@ -48,3 +50,30 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ("id", "email", "first_name", "last_name", "avatar")
+
+
+class UserLanguageSerializer(serializers.Serializer):
+    language = serializers.CharField()
+
+    @staticmethod
+    def validate_language(value):
+        if value not in SUPPORTED_LANGUAGES:
+            raise serializers.ValidationError(
+                f"Language not supported. Choose from this: {SUPPORTED_LANGUAGES}"
+            )
+        return value
+
+
+class UserTimezoneSerializer(serializers.Serializer):
+    timezone = serializers.CharField()
+
+    def validate_timezone(self, value):
+        if value not in zoneinfo.available_timezones():
+            raise serializers.ValidationError(
+                f"Invalid timezone. Use valid IANA timezone"
+            )
+        return value
+
+
+
+
